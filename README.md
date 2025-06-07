@@ -25,7 +25,6 @@ An AI audio transcription platform built with Go for the frontend and Node.js fo
 ## ✨ 特色功能 | Key Features
 
 ### 🎨 前端應用 (apps/frontend/) | Frontend (apps/frontend/)
-#### React 應用 | React Application
 - 使用 HTML + CSS 簡單化的前端介面
   Simplified front-end interface using HTML + CSS
 - 響應式 Material-UI 設計  
