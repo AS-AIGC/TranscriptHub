@@ -36,6 +36,10 @@
  * - POST /api/v1/rest/CancelTask - Cancel running task
  * - POST /api/v1/rest/ViewAllTask - View all tasks
  * - GET /api/v1/rest/RetrieveTranscribe/{FORMAT}/{filename} - Retrieve transcription results
+ * 
+ * @author [ccchungdaw@as.edu.tw]
+ * @version 1.0.0
+ * @license MIT
  */
 
 const express = require('express');
@@ -53,6 +57,7 @@ const { exec, spawn } = require('child_process');
 const event_emitter = new EventEmitter();
 
 const cfg = require('./config.js');
+const shutdown = require('./shutdown.js');
 const { send_notification, translate_ipv4_to_ipv6} = require('./utils.js');
 const { logger } = require('./logger.js');
 const { LOG_LEVEL, NOTIFY_STATUS, TASK_STATUS } = require('./constants.js');
@@ -84,9 +89,15 @@ const { validate_params } = require('./middlewares/validate_params.js');
  * 
  * __DEV__: Development mode
  * - Enables debug logging
+ * - Disables SSL verification
+ * - Uses test database
+ * - Enables verbose error messages
  * 
  * __PROD__: Production mode
  * - Minimal logging
+ * - Enforces SSL verification
+ * - Uses production database
+ * - Security-focused error messages
  */
 const { __DEV__, __PROD__ } = require('./env.js');
 
@@ -107,11 +118,16 @@ if (cluster.isMaster) {
   
   cluster.on('exit', (worker, code, signal) => {
     worker_pids.delete(worker.process.pid);
-    logger(LOG_LEVEL.INFO, `Worker process ${worker.process.pid} died, starting a new one...`);
-    cluster.fork();
+    logger(LOG_LEVEL.INFO, `Worker process ${worker.process.pid} died, starting a new one.`);
+    //cluster.fork();
+
+    // crash back
+    const crash_back_worker = cluster.fork();
+    worker_pids.add(crash_back_worker.process.pid); 
   });
   
   cluster.on('online', (worker) => {
+    logger(LOG_LEVEL.INFO, `Worker online: ${worker.process.pid}`);
     worker.on('message', (message) => {
       if (message.type === 'request_pids') {
         worker.send({type: 'PIDs', pids: Array.from(worker_pids)});
@@ -119,18 +135,44 @@ if (cluster.isMaster) {
     });
   });  
 } else {
+  /**
+   * Graceful shutdown handlers:
+   * This block listens for termination-related signals such as SIGINT (Ctrl+C),
+   * SIGTERM (standard kill), and SIGHUP (terminal closed),
+   * and ensures that all necessary cleanup actions are performed before the process exits.
+   * It helps prevent resource leaks, such as open database connections or file handles.
+   *
+   * Additionally, SIGUSR1 and SIGUSR2 are included as custom signals useful for manual testing
+   * or triggering application-defined behavior during development.
+   */
+  ['SIGINT', 'SIGTERM', 'SIGHUP', 'SIGUSR1', 'SIGUSR2'].forEach(signal => {
+    process.on(signal, () => {
+      logger(LOG_LEVEL.INFO, `[${process.pid}] Received signal: ${signal}`);
+      shutdown(signal);
+    });
+    // process.on(signal, () => shutdown(signal));
+  });
+
+  // Handle uncaught exceptions and perform cleanup before exiting
+  process.on('uncaughtException', async (err) => {
+    logger(LOG_LEVEL.ERROR, `Uncaught exception: ${err}`); 
+    await shutdown('uncaughtException');
+  });
+
   // variables for each cluster process
   let process_sync_worker_pids = null; 
   let child_process = null;
   
   process.on('message', (message) => {
+    // logger(LOG_LEVEL.INFO, `[${process.pid}] Received signal message: ${message.pids}`);
     if (message.type === 'PIDs') {
       set_worker_pids(message.pids);
       cleanup_task();
     }
   });
   
-  
+
+
   const app = express();
   
   app.use(body_parser.json());

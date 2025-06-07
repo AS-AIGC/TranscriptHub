@@ -5,7 +5,7 @@ const path = require('path');
 
 const cfg = require('../config.js');
 const { logger } = require('../logger.js');
-const { pool_promise } = require('../db.js');
+const { pool_promise, get_pool } = require('../db.js');
 
 const { 
   get_worker_pids, 
@@ -50,7 +50,8 @@ async function create_task(data) {
   const query_insert_task = TASK_QUERIES.CREATE_TASK.INSERT_TASK;
   const query_get_task_by_filename = TASK_QUERIES.CREATE_TASK.GET_TASK_BY_FILENAME;
   try {
-    const pool = await pool_promise;
+    //const pool = await pool_promise;
+    const pool = await get_pool();
     await pool.request()
       .input('label', sql.NVarChar, data.label)
       .input('original_filename',sql.NVarChar, data.original_filename)
@@ -136,7 +137,8 @@ async function select_task() {
   // 
 
   try {
-    const pool = await pool_promise;
+    // const pool = await pool_promise;
+    const pool = await get_pool();
     const result = await pool.request()
       .input('pid', sql.Int, process.pid)
       .query(query_select_task);
@@ -186,7 +188,8 @@ async function select_task() {
 async function cancel_task(data) {
   const query_cancel_task = TASK_QUERIES.CANCEL_TASK;
   try {
-    const pool = await pool_promise;
+    // const pool = await pool_promise;
+    const pool = await get_pool();
     const result = await pool.request()
       .input('objid', sql.BigInt, data.objid)
       .query(query_cancel_task);
@@ -238,6 +241,7 @@ async function cleanup_task() {
     pids_for_query.forEach(pid => table.rows.add(pid));
   }
 
+  const memo = operation_memo({});
   if (pids_for_query.length > 0) {
     if (__MSSQL_TEST__) {
       query_cleanup_task += 'AND (PID IS NULL OR PID NOT IN (SELECT value FROM @pids))';
@@ -245,12 +249,13 @@ async function cleanup_task() {
       query_cleanup_task += `AND (PID IS NULL OR PID NOT IN (${pids_for_query}))`;
     }
   } else {
-    return logger(LOG_LEVEL.ERROR, `cleanup_task pids_for_query ${pids_for_query} is empty.`);
+    return logger(LOG_LEVEL.ERROR, `cleanup_task pids_for_query ${pids_for_query} is empty.`, memo);
   }
 
-  const memo = operation_memo({});
+  //const memo = operation_memo({});
   try {
-    const pool = await pool_promise;
+    //const pool = await pool_promise;
+    const pool = await get_pool();
     const request = pool.request();
     if (__MSSQL_TEST__) {
       request
@@ -287,7 +292,8 @@ async function cleanup_task() {
 async function check_task_status(data) {
   const query_task_status = TASK_QUERIES.CHECK_TASK_STATUS;
   try {
-    const pool = await pool_promise;
+    //const pool = await pool_promise;
+    const pool = await get_pool();
     const result = await pool.request()
       .input('objid', sql.BigInt, data.objid)
       .query(query_task_status);
@@ -330,6 +336,7 @@ async function view_all_tasks(data) {
   if (sso_account !== 'all') conditions.push('SSO_ACCOUNT = @SSO_ACCOUNT');
   if ([-3, -2, -1, 0, 1, 2].includes(status)) conditions.push('STATUS = @STATUS');
   conditions.push(`datediff(day, CREATE_AT, getdate()) < ${cfg.tasks.days_limit}`);  // Only show tasks created within the last 30 days
+  conditions.push(`IS_DELETE IS NULL`);
 
   // Append WHERE clause if conditions exist
   if (conditions.length > 0) query += ' WHERE ' + conditions.join(' AND ');
@@ -337,7 +344,8 @@ async function view_all_tasks(data) {
 
   try {
     // Get pool connection from pool_promise
-    const pool = await pool_promise;
+    //const pool = await pool_promise;
+    const pool = await get_pool();
     const request = pool.request();
 
     // Conditionally bind parameters
@@ -384,7 +392,8 @@ async function cleanup_task_() {
     // AND (PID IS NULL OR PID NOT IN (${pids_for_query}));
   const memo = operation_memo({});
   try {
-    const pool = await pool_promise;
+    //const pool = await pool_promise;
+    const pool = await get_pool();
     const result = await pool.request().query(query);
       
     if (result.rowsAffected[0] > 0) {
@@ -431,7 +440,8 @@ async function cleanup_task_() {
     query = TASK_QUERIES.UPDATE_TASK_STATUS.FILE_IO_ERROR;
     
   try {
-    const pool = await pool_promise;
+    //const pool = await pool_promise;
+    const pool = await get_pool();
 
     await pool.request()
       .input('objid',sql.BigInt, data.objid)

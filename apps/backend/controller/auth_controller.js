@@ -27,12 +27,13 @@ const { logger } = require('../logger.js');
 const { LOG_LEVEL } = require('../constants.js');
 const { TASK_QUERIES } = require('../query_constants.js');
 
-const { pool_promise } = require('../db.js');
+const { pool_promise, get_pool } = require('../db.js');
 
 async function is_authorized_to_access_file(data) {
   const query = TASK_QUERIES.AUTH_CONTROLLER.IS_AUTHORIZED_TO_ACCESS_FILE;
   try {
-    const pool = await pool_promise;
+    //const pool = await pool_promise;
+    const pool = await get_pool();
     const result = await pool.request()
       .input('sso_account', sql.NVarChar, data.sso_account)
       .input('filename', sql.NVarChar, data.filename)

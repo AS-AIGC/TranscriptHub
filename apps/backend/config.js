@@ -5,17 +5,19 @@ require('dotenv').config();
 const sql_config = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER || 'localhost',
+  server: process.env.DB_SERVER,
   port: parseInt(process.env.DB_PORT || '1433'),
   database: process.env.DB_NAME,
   options: {
     encrypt: false, // Enable encryption if needed
-    trustServerCertificate: false // Required for self-signed certificates
+    trustServerCertificate: true, // true means to skip certificate validation, so even a self-signed certificate will be accepted.
+    applicationName: 'Sparrow'
   },
   pool: {
     max: 10, // Maximum number of connections in the pool
     min: 0,
-    idleTimeoutMillis: 30000 // Connection idle time before closing
+    idleTimeoutMillis: 30000, // Connection idle time before closing
+    acquireTimeoutMillis: 30000
   }
 };
 
@@ -73,8 +75,8 @@ const http_server = {
 
 // Supported MIME types
 const media_mime_types = [
-  'video/mp4',
-  'video/mpeg',
+  'video/mp4', 
+  'video/mpeg', 
   'audio/mp4', // m4a
   'audio/mpeg', // mp3
   'audio/wav',

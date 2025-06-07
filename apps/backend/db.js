@@ -21,6 +21,44 @@ const pool_promise = new sql.ConnectionPool(cfg.sql_config)
     throw err;
   });
 
+
+
+async function retry(fn, retries = 3, delay = 1000) {
+  while (retries > 0) {
+    try {
+      return await fn();
+    } catch (err) {
+      retries--;
+      console.warn(`Retrying DB connection... (${retries} retries left)`);
+      if (retries === 0) throw err;
+      await new Promise((res) => setTimeout(res, delay));
+    }
+  }
+}
+
+let pool_promise_rev = null;
+
+async function get_pool() {
+  if (!pool_promise_rev) {
+    pool_promise_rev = await retry(() => new sql.ConnectionPool(cfg.sql_config).connect());
+    console.log('Database connected and cached.');
+  }
+  return pool_promise_rev;
+}
+
+async function close_pool() {
+  if (pool_promise_rev) {
+    await pool_promise_rev.close();
+    console.log('Database pool closed.');
+    pool_promise_rev = null;
+  }
+}
+
+sql.on('error', (err) => {
+  console.error('MSSQL global error:', err);
+});
+
+
 async function log_operation_to_db(data) {
   /* Query syntax */
   const query_log_operation = TASK_QUERIES.ACCESS_OPERTION.LOG_OPERATION;
@@ -59,6 +97,8 @@ async function log_operation_to_db(data) {
 module.exports = {
   // sql_db,
   pool_promise,
-  log_operation_to_db
+  log_operation_to_db,
+  get_pool,
+  close_pool
 };
 

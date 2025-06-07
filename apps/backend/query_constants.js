@@ -76,6 +76,7 @@ const TASK_QUERIES = {
       ,FILE_SIZE
       ,TRANSCRIBE
       ,CONTENT_LENGTH
+      ,DURZATION
     FROM TASK
   `,
 
