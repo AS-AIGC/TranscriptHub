@@ -57,7 +57,7 @@ An AI audio transcription platform built with Go for the frontend and Node.js fo
 
 ## 🏗 系統架構 | Architecture
 ```
-前端 (React + Go) ←→ API 閘道器 ←→ 後端服務 (Node.js)
+前端 (Go) ←→ API 閘道器 ←→ 後端服務 (Node.js)
     ↓                  ↓               ↓
 UI 元件           負載平衡         工作程序
     ↓                  ↓               ↓
@@ -65,7 +65,7 @@ Go 檔案處理      API 路由         任務處理
     ↓                  ↓               ↓
 Material-UI      認證服務        SQL 資料庫
 
-Frontend (React + Go) ←→ API Gateway ←→ Backend (Node.js)
+Frontend (Go) ←→ API Gateway ←→ Backend (Node.js)
        ↓                    ↓                ↓
   UI Components        Load Balancer     Worker Processes
        ↓                    ↓                ↓
