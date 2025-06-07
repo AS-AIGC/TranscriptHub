@@ -7,9 +7,9 @@
 
 ![TranscriptHub Intro](image/TranscriptHub-zhtw.png)
 
-一個 AI 語音轉錄平台，採用 React + Go 作為前端技術，並以 Node.js 作為後端基礎，提供高品質的語音轉錄服務。
+一個 AI 語音轉錄平台，採用 Go 作為前端技術，並以 Node.js 作為後端基礎，提供高品質的語音轉錄服務。
 
-An AI audio transcription platform built with React + Go for the frontend and Node.js for the backend, providing high-quality transcription services.
+An AI audio transcription platform built with Go for the frontend and Node.js for the backend, providing high-quality transcription services.
 
 ---
 
