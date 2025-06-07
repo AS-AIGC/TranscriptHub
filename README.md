@@ -1,7 +1,6 @@
 # TranscriptHub 
 [![Academia Sinica](https://img.shields.io/badge/Academia%20Sinica-%23006E99.svg)](https://www.sinica.edu.tw)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![React](https://img.shields.io/badge/React-v18-blue.svg)](https://reactjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-v18-green.svg)](https://nodejs.org/)
 [![Go](https://img.shields.io/badge/Go-v1.20-00ADD8.svg)](https://golang.org/)
 [![WhisperX](https://img.shields.io/badge/WhisperX-AI-orange.svg)](https://github.com/m-bain/whisperX)
