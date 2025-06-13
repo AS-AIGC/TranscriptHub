@@ -351,6 +351,7 @@ try:
         for idx, sub in enumerate(all_subtitles, start=1):
             start_time = format_time(sub['start'])
             end_time = format_time(sub['end'])
+            speaker = segment.get('speaker', 'Unknown Speaker') if diarize_toggle == "1" else ""
             text = sub['text']
             srt_file.write(f"{idx}\n")
             srt_file.write(f"{start_time} --> {end_time}\n")
