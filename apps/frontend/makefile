@@ -18,7 +18,7 @@ build: tidy clean
 	-o ${APP}
 
 build-win: tidy clean
-	GOOS=windows GOARCH=amd64 go build -tags netgo -o ${APP}.exe
+	go build -tags netgo -o ${APP}.exe
 
 docker: build
 	docker build -t ${ImageName}:${version} .
