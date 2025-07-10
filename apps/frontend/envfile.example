@@ -15,14 +15,14 @@ smtpPort=25
 smtpEmail=its@sinica.edu.tw
 smtpPassword=
 
-TranslateEndpoint=http://localhost/api/v1/rest/
-TranslateUrl=https://localhost/api/v1/rest/CreateTranscribeTask
-TranslateQueryUrl=https://localhost/api/v1/rest/ViewAllTask
-DownloadServer=https://localhost/api/v1/rest/RetrieveTranscribe/
+TranslateEndpoint=https://localhost:3000/api/v1/rest/
+TranslateUrl=https://localhost:3000/api/v1/rest/CreateTranscribeTask
+TranslateQueryUrl=https://localhost:3000/api/v1/rest/ViewAllTask
+DownloadServer=https://localhost:3000/api/v1/rest/RetrieveTranscribe/
 
 Scope=basic
-TokenUrl=https://fisa.test.sinica.edu.tw/index.php/sso2/access_token
-UserUrl=https://fisa.test.sinica.edu.tw/index.php/sso2/basic
+TokenUrl=https://localhost/index.php/sso2/access_token
+UserUrl=https://localhost/index.php/sso2/basic
 JwtKey=justgps@gmail.com
 
 MaxUploadSize=290
