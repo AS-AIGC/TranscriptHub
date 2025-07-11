@@ -575,9 +575,11 @@
 
    function cycleEvents() {
       $.ajax({ url: "/query/jobs", method: "GET",
-         success:function(res){
+         success:function(res){            
             if(!res) { console.log(res); return; }
-            var events = JSON.parse(res);
+            var events;
+            if (typeof res === 'string') { events = JSON.parse(res); }
+            else { events = res; }
             if(needReload) {
                generateTable(events);
                return;
@@ -596,6 +598,8 @@
                   elem.innerHTML = s;
                }
             } else {
+               console.log("No event");
+               console.log(res);
             }
          },
          error:function(err) {
