@@ -3,7 +3,7 @@ module github.com/asccclass/aisuite
 go 1.24.0
 
 require (
-	github.com/asccclass/sherryserver v0.9.3
+	github.com/asccclass/sherryserver v1.0.6
 	github.com/asccclass/sherrytime v0.0.2
 	github.com/faiface/beep v1.1.0
 	github.com/joho/godotenv v1.5.1
