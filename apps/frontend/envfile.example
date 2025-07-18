@@ -1,5 +1,5 @@
 SystemName=TranscriptHub
-PORT=80
+PORT=443
 ContainerName=aisuite
 OriginAllowList=https://localhost;http://localhost
 AllowMethods=POST;GET;PUT;DELETE
@@ -14,6 +14,9 @@ mailHost=smtp.sinica.edu.tw
 smtpPort=25
 smtpEmail=its@sinica.edu.tw
 smtpPassword=
+
+#sslKeyfile=D:\TranscriptHub\apps\backend\key.pem
+#sslCertification=D:\TranscriptHub\apps\backend\certificate.pem
 
 TranslateEndpoint=https://localhost:3000/api/v1/rest/
 TranslateUrl=https://localhost:3000/api/v1/rest/CreateTranscribeTask
