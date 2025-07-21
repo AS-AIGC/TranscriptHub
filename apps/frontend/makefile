@@ -13,6 +13,10 @@ clean:
 tidy:
 	go mod tidy
 
+build-mac: tidy clean
+	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 GO111MODULE=${GoMode} go build -tags netgo \
+	-o ${APP}
+
 build: tidy clean
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 GO111MODULE=${GoMode} go build -tags netgo \
 	-o ${APP}
