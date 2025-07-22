@@ -301,7 +301,7 @@ if (cluster.isMaster) {
     // Listen to stderr data
     child_process.stderr.on('data', (data) => {
       if (__DEV__)
-        logger(LOG_LEVEL.ERROR, `execute_task (transcribe script) stderr:\n${data}`);
+        logger(LOG_LEVEL.INFO, `execute_task (transcribe script) stderr:\n${data}`);
     });
 
     // Listen for error event
