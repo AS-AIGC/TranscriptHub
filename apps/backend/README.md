@@ -71,6 +71,15 @@ The system employs a multi-layered architecture:
 
 ### 安裝步驟 | Installation Steps
 
+> [!TIP]
+> 📖 **進階安裝筆記**：建議參考 [安裝筆記](https://hackmd.io/@San-Li/B1nKclLygx)（由社群整理，內容詳盡，涵蓋更多安裝細節與常見問題）。
+>
+> 📖 **Advanced Installation Notes**: For more details and troubleshooting, refer to the [Installation Notes](https://hackmd.io/@San-Li/B1nKclLygx) (community-maintained, comprehensive, and covers additional setup tips and common issues).
+
+> [!NOTE]
+> 以下安裝步驟由本專案團隊整理與維護，請依照指引操作。
+>
+> The following installation steps are provided and maintained by our project team. Please follow the instructions accordingly.
 1. **設定資料庫 | Set up Database**
 ```bash
 # 使用 Docker 快速部署 SQL Server | Quick deployment with Docker

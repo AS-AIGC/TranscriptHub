@@ -3,3 +3,4 @@ whisperx
 opencc-python-reimplemented
 python-dotenv
 huggingface-hub
+hf_xet
