@@ -101,22 +101,22 @@ func UpdateJobsViaTaskID(msg ReturnMessage)(error) {
          st := sherrytime.NewSherryTime("Asia/Taipei", "-")  // Initial
          Joblistz[idx].Results = msg.Results
          Joblistz[idx].FinishTime = st.Now()
-	 if msg.Status == 10 {
-	    Joblistz[idx].Status = "Done"
-	    NeedSave = true
-	    go SendEmailNotify(msg.TaskID, msg.Status)
+         if msg.Status == 10 {
+            Joblistz[idx].Status = "Done"
+            NeedSave = true
          } else if msg.Status == 5 {
-	    Joblistz[idx].Status = "Queue"
-	    NeedSave = true
+            Joblistz[idx].Status = "Queue"
+            NeedSave = true
          } else if msg.Status == 1 {
-	    Joblistz[idx].Status = "Canceled"
-	    go SendEmailNotify(msg.TaskID, msg.Status)
-	 } else if msg.Status == 0 {
-	    Joblistz[idx].Status = "Error"
-	    go SendEmailNotify(msg.TaskID, msg.Status)
-	 }
-	 foundz = true
-	 break
+            Joblistz[idx].Status = "Canceled"
+         } else if msg.Status == 0 {
+            Joblistz[idx].Status = "Error"
+         }
+         if NeedSave {
+            go SendEmailNotify(msg.TaskID, msg.Status)
+         }
+         foundz = true
+         break
       }
    }
    if !foundz {
