@@ -4,6 +4,42 @@ Academia Sinica AI 語音轉錄平台後端服務，基於 Node.js 與 WhisperX 
 
 Enterprise-grade audio transcription backend service powered by Node.js and WhisperX engine, developed for Academia Sinica.
 
+## 快速啟動
+
+### Linux (預設)
+
+- 使用 `scripts/config.json`
+- 使用 `run.sh`（或依既有部署方式啟動 `main.js`）
+
+### Windows
+
+1. 確認 `.env` 已依照你的環境填好；Windows 版請使用 `scripts/config.windows.json`（或在 `.env` 設定 `WHISPERX_CONFIG_PATH` 指到你要的檔案）。
+2. 下載 Node.js v18.20.3 (win-x64 zip) 並解壓到 `apps/backend/`，資料夾名稱需為 `node-v18.20.3-win-x64/`。
+3. 執行：
+
+```powershell
+cd C:\working\codex_workspace\TranscriptHub\apps\backend
+powershell -ExecutionPolicy Bypass -File .\scripts\run-windows.ps1
+```
+
+Windows 首次執行前，請確保 WhisperX conda env 已安裝本專案 Python 依賴：
+
+```powershell
+& "C:\Users\chung\anaconda3\envs\whisperx\python.exe" -m pip install -r .\scripts\requirements.txt
+```
+
+資料庫 schema 更新（保留資料、可重複執行）：
+
+```powershell
+node .\scripts\db-migrate.js
+```
+
+健康檢查（自簽憑證，curl 需 `-k`）：
+
+```powershell
+curl.exe -k -I https://localhost:8080/api/v1/rest/RetrieveTranscribe/TXT/test
+```
+
 ## 目錄 | Table of Contents
 - [核心功能 | Core Features](#核心功能--core-features)
 - [系統架構 | System Architecture](#系統架構--system-architecture)

@@ -55,6 +55,22 @@ const {
 } = require('./shared.js');
 const ffprobe = require('fluent-ffmpeg');
 const mime = require('mime-types');
+const { __PROD__ } = require('./env.js');
+
+function is_path_within(parent_path, target_path) {
+  const parent = path.resolve(parent_path);
+  const target = path.resolve(target_path);
+  const rel = path.relative(parent, target);
+  return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
+}
+
+function is_allowed_media_path(file_path) {
+  const allowed_roots = [
+    cfg.paths.uploaded_files_path,
+    cfg.paths.uploaded_files_lc_path
+  ];
+  return allowed_roots.some((root) => is_path_within(root, file_path));
+}
 
 /**
  * @brief Check if file is a supported media type (callback version)
@@ -71,6 +87,11 @@ const mime = require('mime-types');
  * @note Checks both file existence and MIME type
  */
 function is_media_file_callback(file_path, callback) {
+  if (!is_allowed_media_path(file_path)) {
+    logger(LOG_LEVEL.ERROR, `Refused media access outside upload paths: ${file_path}`);
+    return callback(null, false);
+  }
+
   fs.access(file_path, (err) => {
     if (err) {
       logger(LOG_LEVEL.ERROR, `Error accessing audio source file ${err.message}`);
@@ -261,12 +282,13 @@ async function send_notification(notify_config, notify_data, task_objid) {
  * @note SSL verification intentionally disabled
  */
 function prepare_request_options(config, data) {
+  const should_reject_unauthorized = __PROD__;
   return {
       hostname: config.server,
       port: config.port,
       path: config.path,
       method: config.method,
-      rejectUnauthorized: false,
+      rejectUnauthorized: should_reject_unauthorized,
       headers: {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(data)

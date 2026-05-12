@@ -40,8 +40,8 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 # Setup config and logging
 # ---------------------------
 try:
-    # Read config.json
-    config_path = os.path.join(os.path.dirname(__file__), "config.json")
+    # Read config.json (allow override via env var)
+    config_path = os.getenv("WHISPERX_CONFIG_PATH") or os.path.join(os.path.dirname(__file__), "config.json")
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
     
@@ -113,7 +113,7 @@ load_dotenv()
 try:
     as_filename = sys.argv[1]
     diarize_toggle = sys.argv[2]
-    language_preferred = sys.argv[3]
+    language_preferred = sys.argv[3] if len(sys.argv) > 3 else None
     hf_token = os.getenv("HF_TOKEN")
 except IndexError as e:
     logger.critical("Not enough command line arguments provided.", exc_info=True)
@@ -257,7 +257,7 @@ except Exception as e:
 if diarize_toggle == "1":
     try:
         logger.info("Assign speaker labels using the diarization model")
-        diarize_model = whisperx.DiarizationPipeline(use_auth_token=HF_TOKEN, device=DEVICE)
+        diarize_model = whisperx.diarize.DiarizationPipeline(use_auth_token=HF_TOKEN, device=DEVICE)
         diarize_segments = diarize_model(audio)
         align_result = whisperx.assign_word_speakers(diarize_segments, align_result)
     except Exception as e:

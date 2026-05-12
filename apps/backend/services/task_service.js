@@ -20,6 +20,20 @@ const { TASK_QUERIES } = require('../query_constants.js');
 
 const { __MSSQL_TEST__ } = require('../env.js');
 
+function is_safe_filename(filename) {
+  return typeof filename === 'string' && /^[A-Za-z0-9_-]+$/.test(filename);
+}
+
+function resolve_download_file_path(base_dir, filename, extension) {
+  const resolved_base = path.resolve(base_dir);
+  const resolved_file = path.resolve(resolved_base, `${filename}.${extension}`);
+  const rel = path.relative(resolved_base, resolved_file);
+  if (rel.startsWith('..') || path.isAbsolute(rel)) {
+    throw new Error('Invalid download path.');
+  }
+  return resolved_file;
+}
+
 /**
  * @brief Create new transcription task in database
  *
@@ -485,7 +499,19 @@ async function get_task_result_path(filename, file_type) {
     JSON: 'transcribe_json_path'
   };
 
-  const file_path = path.join(cfg.paths[download_paths[file_type]], `${filename}.${file_type.toLowerCase()}`);
+  if (!download_paths[file_type]) {
+    throw new Error('Unsupported file type.');
+  }
+
+  if (!is_safe_filename(filename)) {
+    throw new Error('Invalid filename.');
+  }
+
+  const file_path = resolve_download_file_path(
+    cfg.paths[download_paths[file_type]],
+    filename,
+    file_type.toLowerCase()
+  );
 
   if (!fs.existsSync(file_path)) {
     throw new Error(`The file ${file_path} does not exist.`);

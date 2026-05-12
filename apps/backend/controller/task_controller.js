@@ -58,6 +58,10 @@ const {
   operation_memo
 } = require('../shared.js');
 
+function is_safe_download_filename(filename) {
+  return typeof filename === 'string' && /^[A-Za-z0-9_-]+$/.test(filename);
+}
+
 
 /**
  * @brief Create and initialize a new transcription task
@@ -520,7 +524,13 @@ async function view_all_tasks_controller(req, res) {
  * @note Includes access logging for security
  */
 async function handle_file_download_controller(req, res, file_type) {
-  const filename = req.params.filename; 
+  const filename = req.params.filename;
+  if (!is_safe_download_filename(filename)) {
+    return res.status(400).json({
+      message: 'Invalid filename format.',
+      status: NOTIFY_STATUS.ERROR
+    });
+  }
   const { sso_account, task_objid, token } = req.query; // GET parameters
   const ip_address = translate_ipv4_to_ipv6(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
 

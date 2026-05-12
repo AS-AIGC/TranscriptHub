@@ -1,4 +1,6 @@
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 
 
 // DB configurations
@@ -41,21 +43,71 @@ const notify_status = {
 };
 
 const TASK_HOME = process.env.TASK_HOME;
+
+function mustEnv(name) {
+  const value = process.env[name];
+  if (!value) throw new Error(`Missing required env var: ${name}`);
+  return value;
+}
+
+function ensureDir(dirPath) {
+  fs.mkdirSync(dirPath, { recursive: true });
+}
   
 // Path configurations
+const taskHomeAbs = path.resolve(mustEnv('TASK_HOME'));
+const scriptsDir = process.env.TASK_SCRIPT
+  ? path.resolve(process.env.TASK_SCRIPT)
+  : path.join(taskHomeAbs, 'scripts');
+
+const uploadDir = path.join(taskHomeAbs, 'upload');
+const uploadlcDir = path.join(taskHomeAbs, 'uploadlc');
+const transcribeDir = path.join(taskHomeAbs, 'transcribe');
+const logDir = path.join(taskHomeAbs, 'log');
+
+// Ensure runtime directories exist (Windows-friendly)
+ensureDir(scriptsDir);
+ensureDir(uploadDir);
+ensureDir(uploadlcDir);
+ensureDir(logDir);
+ensureDir(path.join(transcribeDir, 'txt'));
+ensureDir(path.join(transcribeDir, 'srt'));
+ensureDir(path.join(transcribeDir, 'vtt'));
+ensureDir(path.join(transcribeDir, 'tsv'));
+ensureDir(path.join(transcribeDir, 'json'));
+
 const paths = {
-  task_script_path: `${TASK_HOME}/scripts`,
-  task_script: 'exec_whisperx_task_v1.0.py',
-  uploaded_files_path: `${TASK_HOME}/upload/`,
-  uploaded_files_lc_path: `${TASK_HOME}/uploadlc/`,
-  python_bin: process.env.PYTHON_BIN,
-  transcribe_txt_path: `${TASK_HOME}/transcribe/txt/`,
-  transcribe_srt_path: `${TASK_HOME}/transcribe/srt/`,
-  transcribe_vtt_path: `${TASK_HOME}/transcribe/vtt/`,
-  transcribe_tsv_path: `${TASK_HOME}/transcribe/tsv/`,
-  transcribe_json_path: `${TASK_HOME}/transcribe/json/`,
-  log_path: `${TASK_HOME}/log/`
+  task_script_path: scriptsDir,
+  task_script: 'exec_whisperx_task_v1.2.py',
+  uploaded_files_path: uploadDir + path.sep,
+  uploaded_files_lc_path: uploadlcDir + path.sep,
+  python_bin: mustEnv('PYTHON_BIN'),
+  transcribe_txt_path: path.join(transcribeDir, 'txt') + path.sep,
+  transcribe_srt_path: path.join(transcribeDir, 'srt') + path.sep,
+  transcribe_vtt_path: path.join(transcribeDir, 'vtt') + path.sep,
+  transcribe_tsv_path: path.join(transcribeDir, 'tsv') + path.sep,
+  transcribe_json_path: path.join(transcribeDir, 'json') + path.sep,
+  log_path: logDir + path.sep,
+  whisperx_config_path: null
 };
+
+// WhisperX config selection:
+// - Default (Linux): scripts/config.json
+// - Windows: scripts/config.windows.json (if exists) else scripts/config.json
+// - Override: set WHISPERX_CONFIG_PATH in .env (absolute or relative to TASK_HOME)
+const configuredConfigPath = process.env.WHISPERX_CONFIG_PATH;
+if (configuredConfigPath) {
+  paths.whisperx_config_path = path.isAbsolute(configuredConfigPath)
+    ? configuredConfigPath
+    : path.resolve(taskHomeAbs, configuredConfigPath);
+} else {
+  const windowsCandidate = path.join(scriptsDir, 'config.windows.json');
+  const defaultCandidate = path.join(scriptsDir, 'config.json');
+  paths.whisperx_config_path =
+    process.platform === 'win32' && fs.existsSync(windowsCandidate)
+      ? windowsCandidate
+      : defaultCandidate;
+}
 
 const tasks = {
   days_limit: 30 
@@ -69,8 +121,9 @@ const system = {
 const http_server = {
   host: process.env.TASK_SERVER,
   port: process.env.TASK_SERVER_PORT,
-  key_path: `${TASK_HOME}/key.pem`,
-  certificate_path: `${TASK_HOME}/certificate.pem`
+  port_http: process.env.TASK_SERVER_PORT_HTTP,
+  key_path: path.join(taskHomeAbs, 'key.pem'),
+  certificate_path: path.join(taskHomeAbs, 'certificate.pem')
 }
 
 // Supported MIME types

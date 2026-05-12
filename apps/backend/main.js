@@ -43,6 +43,7 @@
  */
 
 const express = require('express');
+const http = require('http');
 const https = require('https');
 const cors = require('cors');
 const fs = require('fs')
@@ -174,8 +175,15 @@ if (cluster.isMaster) {
 
 
   const app = express();
-  
+
   app.use(body_parser.json());
+  app.get('/', (req, res) => {
+    res.status(200).json({ ok: true, service: 'TranscriptHub backend' });
+  });
+
+  if (__DEV__) {
+    app.use('/test_client', express.static(path.join(__dirname, 'test_client')));
+  }
   app.use((req, res, next) => {
     res.setHeader('Connection', 'close'); // disable HTTP Keep-Alive to ensure each process is used in a balanced rotation.
     logger(LOG_LEVEL.INFO, `Process ${process.pid} handling request: ${req.method} ${req.originalUrl}`);
@@ -290,7 +298,16 @@ if (cluster.isMaster) {
     // directs the message from changing the encoding to null.
     // child_process = exec(`chcp 65001 >nul && ${python_bin} ${python_script_path} ${task_filename}`, (err, stdout, stderr) => { 
     // Use spawn instead of exec
-    child_process = spawn(python_bin, [transcribe_script_path, task_filename, task_diarize]);
+    child_process = spawn(
+      python_bin,
+      [transcribe_script_path, task_filename, task_diarize],
+      {
+        env: {
+          ...process.env,
+          WHISPERX_CONFIG_PATH: cfg.paths.whisperx_config_path
+        }
+      }
+    );
 
     // Listen to stdout data
     child_process.stdout.on('data', (data) => {
@@ -658,4 +675,12 @@ if (cluster.isMaster) {
   https.createServer(options, app).listen(cfg.http_server.port, () => {
     logger(LOG_LEVEL.INFO, `Worker process ${process.pid} is running on https://${cfg.http_server.host}:${cfg.http_server.port}`);
   });
+
+  // Development-friendly HTTP endpoint (avoids self-signed cert issues for local testing).
+  if (__DEV__ && cfg.http_server.port_http) {
+    const httpPort = parseInt(cfg.http_server.port_http, 10);
+    http.createServer(app).listen(httpPort, () => {
+      logger(LOG_LEVEL.INFO, `Worker process ${process.pid} is running on http://${cfg.http_server.host}:${httpPort}`);
+    });
+  }
 }
