@@ -1,6 +1,1 @@
-ffmpeg-python==0.2.0
-whisperx
-opencc-python-reimplemented
-python-dotenv
-huggingface-hub
-hf_xet
+-r ../requirements.txt

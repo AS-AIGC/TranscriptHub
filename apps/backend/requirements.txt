@@ -1,0 +1,8 @@
+ffmpeg-python==0.2.0
+opencc-python-reimplemented
+python-dotenv
+huggingface-hub
+hf_xet
+ckip-transformers
+setuptools>=70.0.0
+transformers>=4.48.0,<4.49.0
