@@ -1,1 +1,45 @@
+# Env / secrets
 .env
+
+# Node
+node_modules/
+node_module/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+node-v*-win-x64/
+node-v*-win-x64.zip
+
+# Runtime data (generated)
+master.pid
+log/
+upload/
+uploadlc/
+transcribe/
+test_client/
+
+# Python caches
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local WhisperX config (contains machine-specific paths/tokens)
+scripts/config.json
+scripts/config.windows.json
+code-scanning-alerts.json
+dependabot-alerts.json
+scripts/*.bk
+scripts/*.bk2
+*.bk
+*.bk2
+
+# Archives / binaries
+*.zip
+*.7z
+*.exe
