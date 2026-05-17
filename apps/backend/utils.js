@@ -72,6 +72,14 @@ function is_allowed_media_path(file_path) {
   return allowed_roots.some((root) => is_path_within(root, file_path));
 }
 
+function normalize_allowed_media_path(file_path) {
+  const normalized_path = path.resolve(file_path);
+  if (!is_allowed_media_path(normalized_path)) {
+    return null;
+  }
+  return normalized_path;
+}
+
 /**
  * @brief Check if file is a supported media type (callback version)
  * 
@@ -87,18 +95,19 @@ function is_allowed_media_path(file_path) {
  * @note Checks both file existence and MIME type
  */
 function is_media_file_callback(file_path, callback) {
-  if (!is_allowed_media_path(file_path)) {
+  const normalized_media_path = normalize_allowed_media_path(file_path);
+  if (!normalized_media_path) {
     logger(LOG_LEVEL.ERROR, `Refused media access outside upload paths: ${file_path}`);
     return callback(null, false);
   }
 
-  fs.access(file_path, (err) => {
+  fs.access(normalized_media_path, (err) => {
     if (err) {
       logger(LOG_LEVEL.ERROR, `Error accessing audio source file ${err.message}`);
       return callback(null, false);
     }
 
-    const mime_type = mime.lookup(file_path);
+    const mime_type = mime.lookup(normalized_media_path);
     
     callback(null, cfg.media_mime_types.includes(mime_type));
   });
@@ -116,7 +125,12 @@ function is_media_file_callback(file_path, callback) {
  * @note Validates media type before processing
  */
 function get_media_duration_callback(file_path, callback) {
-  is_media_file_callback(file_path, (err, is_media) => {
+  const normalized_media_path = normalize_allowed_media_path(file_path);
+  if (!normalized_media_path) {
+    return callback(new Error('Not a supported media file'));
+  }
+
+  is_media_file_callback(normalized_media_path, (err, is_media) => {
     if (err) {
       return callback(err);
     }
@@ -125,12 +139,12 @@ function get_media_duration_callback(file_path, callback) {
       return callback(new Error('Not a supported media file'));
     }
 
-    ffprobe.ffprobe(file_path, (err, metadata) => {
+    ffprobe.ffprobe(normalized_media_path, (err, metadata) => {
       if (err) {
         console.error('FFprobe Error:', {
           message: err.message,
           code: err.code,
-          file_path: file_path
+          file_path: normalized_media_path
         });
         return callback(err);
       }
@@ -139,8 +153,8 @@ function get_media_duration_callback(file_path, callback) {
       
       callback(null, {
         duration: duration,
-        file_type: path.extname(file_path),
-        mime_type: mime.lookup(file_path)
+        file_type: path.extname(normalized_media_path),
+        mime_type: mime.lookup(normalized_media_path)
       });
     });
   });
