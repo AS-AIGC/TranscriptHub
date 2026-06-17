@@ -2,7 +2,6 @@
 const fs = require('fs');
 const path = require('path');
 const cfg = require('./config.js'); 
-const { log_operation_to_db } = require('./db.js');
 
 /* Initialize logging directory and file path */
 const log_path = cfg.paths.log_path;
@@ -32,6 +31,7 @@ function write_to_log_file(text) {
  * @brief Writes log entry to database with metadata
  */
 async function write_to_database(level, message, data) {
+  const { log_operation_to_db } = require('./db.js');
   await log_operation_to_db({
       route: data.route || '',
       token: data.token || '',

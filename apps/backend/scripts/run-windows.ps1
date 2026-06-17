@@ -3,14 +3,14 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-# Prefer the local Node 18 runtime (downloaded) to match README requirements.
-$nodeDir = Join-Path $root "node-v18.20.3-win-x64"
+# Prefer the local Node 20 runtime (downloaded) to match backend dependency requirements.
+$nodeDir = Join-Path $root "node-v20.19.5-win-x64"
 $nodeExe = Join-Path $nodeDir "node.exe"
 $npmCmd = Join-Path $nodeDir "npm.cmd"
 
 if (!(Test-Path $nodeExe)) {
   Write-Host "Missing $nodeExe"
-  Write-Host "Download Node.js v18.20.3 (win-x64 zip) into $root, or run the download step from the setup instructions."
+  Write-Host "Download Node.js v20.19.5 (win-x64 zip) into $root, or run the download step from the setup instructions."
   exit 1
 }
 
