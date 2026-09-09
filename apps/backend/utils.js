@@ -57,27 +57,34 @@ const ffprobe = require('fluent-ffmpeg');
 const mime = require('mime-types');
 const { __PROD__ } = require('./env.js');
 
-function is_path_within(parent_path, target_path) {
-  const parent = path.resolve(parent_path);
-  const target = path.resolve(target_path);
-  const rel = path.relative(parent, target);
-  return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
-}
+const SAFE_MEDIA_FILENAME = /^[A-Za-z0-9_.-]+$/;
 
-function is_allowed_media_path(file_path) {
-  const allowed_roots = [
-    cfg.paths.uploaded_files_path,
-    cfg.paths.uploaded_files_lc_path
+function allowed_media_roots() {
+  return [
+    path.resolve(cfg.paths.uploaded_files_path),
+    path.resolve(cfg.paths.uploaded_files_lc_path)
   ];
-  return allowed_roots.some((root) => is_path_within(root, file_path));
 }
 
 function normalize_allowed_media_path(file_path) {
-  const normalized_path = path.resolve(file_path);
-  if (!is_allowed_media_path(normalized_path)) {
+  if (typeof file_path !== 'string' || file_path.length === 0) {
     return null;
   }
-  return normalized_path;
+
+  const filename = path.basename(file_path);
+  if (!SAFE_MEDIA_FILENAME.test(filename)) {
+    return null;
+  }
+
+  const input_path = path.resolve(file_path);
+  for (const root of allowed_media_roots()) {
+    const candidate_path = path.join(root, filename);
+    if (input_path === path.resolve(candidate_path)) {
+      return candidate_path;
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -393,7 +400,10 @@ function log_failed_response(error, data, task_objid, memo) {
 module.exports = {
     translate_ipv4_to_ipv6,
     send_notification,
-    get_media_duration
+    get_media_duration,
+    _private: {
+      normalize_allowed_media_path
+    }
 };
 
   
