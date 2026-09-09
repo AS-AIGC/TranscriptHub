@@ -3,8 +3,8 @@
     "db:migrate": "node scripts/db-migrate.js"
   },
   "dependencies": {
-    "axios": "^1.7.7",
-    "body-parser": "^2.2.0",
+    "axios": "^1.18.0",
+    "body-parser": "^2.3.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.19.2",
@@ -13,5 +13,8 @@
     "mime-types": "^2.1.35",
     "mssql": "^11.0.1",
     "multer": "^1.4.5-lts.1"
+  },
+  "overrides": {
+    "qs": "^6.16.0"
   }
 }
